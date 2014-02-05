@@ -1,24 +1,25 @@
 /**
  * 
- * La aplicación está destinada principalmente a los usuarios de Internet por línea telefónica que 
- * habitan en Xochiltepec, Puebla, Mexico y San Martín Totoltepec, Puebla, Mexico donde el cable telefónico 
+ * La aplicaciÃ³n estÃ¡ destinada principalmente a los usuarios de Internet por lÃ­nea telefÃ³nica que 
+ * habitan en Xochiltepec, Puebla, Mexico y San MartÃ­n Totoltepec, Puebla, Mexico donde el cable telefÃ³nico 
  * es robado -principalmente por la madrugada cuando nadie vigila-. 
  * 
- * Al activar el monitoreo la aplicación estará haciendo pruebas de conexión cada cierto tiempo, 
- * al detectar que no puede conectarse a un servidor después de algunos intentos, emitirá un sonido de alarma.
- * Nota: Se requiere que el dispositivo esté siempre conectado a la red WiFi.
+ * Al activar el monitoreo la aplicaciÃ³n estarÃ¡ haciendo pruebas de conexiÃ³n cada cierto tiempo, 
+ * al detectar que no puede conectarse a un servidor despuÃ©s de algunos intentos, emitirÃ¡ un sonido de alarma.
+ * Nota: Se requiere que el dispositivo estÃ© siempre conectado a la red WiFi.
  * 
  * 
- * Proyecto empezado por AFelipe Lima Cortés el 28 de agosto de 2013
+ * Proyecto empezado por AFelipe Lima CortÃ©s el 28 de agosto de 2013
  * 
- * Nota: Si has adquirido este código entonces ayuda a mejorarlo, de lo contrario, espero sirva como parte
- * del aprendizaje sobre programación.
+ * Nota: Si has adquirido este cÃ³digo entonces ayuda a mejorarlo, de lo contrario, espero sirva como parte
+ * del aprendizaje sobre programaciÃ³n.
  * 
- * El código aún necesita ser pulido, mientras pueda cotinuaré mejorandolo
+ * El cÃ³digo aÃºn necesita ser pulido, mientras pueda cotinuarÃ© mejorandolo
  * 
  * Mi email: afelipelc@gmail.com
+ * @author afelipe
  * 
- * Versión 0.1 Beta.
+ * VersiÃ³n 0.1 Beta.
  */
 
 package mx.afelipe.android.alarma.services;
@@ -50,6 +51,11 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+
+/**
+ * Servicio encargado de ejecutar la tarea de monitoreo de la conexiÃ³n a Internet
+ *
+ */
 public class MonitorService extends Service {
 
 	// si se hereda IntentService haria que el servicio termine automaticamente
@@ -61,7 +67,6 @@ public class MonitorService extends Service {
 	TimerTask monitorTask;
 	boolean monitorActivado;
 	private final long tiempoMonitor = (1000 * 60) * 5; // 5 mins
-	// private long tiempoCritico = (1000 * 60 )* 1;
 
 	MediaPlayer mediaPlayer;
 
@@ -76,11 +81,11 @@ public class MonitorService extends Service {
 		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		if (CargarEstadoInPrefs())
 			IniciarMonitor();
-
+/*
 		Toast.makeText(getApplicationContext(),
 				"Activando servicio de monitoreo de Internet.",
 				Toast.LENGTH_SHORT).show();
-
+*/
 	}
 
 	@Override
@@ -90,15 +95,22 @@ public class MonitorService extends Service {
 
 	@Override
 	public void onDestroy() {
-		// Cancel the persistent notification.
-		// mNM.cancel(NOTIFICATION);
+		DetenerMonitor(true); // si Android lo detiene, detener la tarea de
+							// monitoreo para reiniciar despuÃ©s
+		//Toast.makeText(this, "Apagando servicio de monitoreo de Internet",
+		//		Toast.LENGTH_SHORT).show();
 
-		// Tell the user we stopped.
-		DetenerMonitor(); // si Android lo detiene, detener la tarea de
-							// monitoreo para reiniciar despues
-		Toast.makeText(this, "Apagando servicio de monitoreo de Internet",
-				Toast.LENGTH_SHORT).show();
-		((AlarmaConexionInternet) getApplication()).setMonitorService(null);
+		// si Android lo destruye, reanudar el servicio
+		if (this.isMonitorActivado()) {
+			((AlarmaConexionInternet) getApplication()).getSucesos().add(
+					new Suceso("Intentando reiniciar Monitoreo de conexiÃ³n",
+							new Date(), false));
+			Intent intent = new Intent(
+					"mx.afelipe.android.alarma.restartservice");
+			sendBroadcast(intent);
+		}
+
+		//((AlarmaConexionInternet) getApplication()).setMonitorService(null);
 	}
 
 	@Override
@@ -115,12 +127,12 @@ public class MonitorService extends Service {
 	private boolean sucesoCritico = false;
 	private boolean sonarAlarma = false;
 
+	//Al iniciar el servicio, cargar el estado inicial del servicio 
 	private boolean CargarEstadoInPrefs() {
 		// Retrive store shared preferences
 		prefsMonitor = getSharedPreferences("prefsmonitor",
 				Context.MODE_PRIVATE);
-		Log.i("Monitor Internet",
-				"Reiniciar monitoreo, guardado como activado.");
+		//Log.i("Monitor Internet", "Reiniciar monitoreo, guardado como activado.");
 		return prefsMonitor.getBoolean("monitorstatus", false);
 
 	}
@@ -150,7 +162,7 @@ public class MonitorService extends Service {
 					completMsg = ntConect ? "Conectado"
 							: "DESCONECTADO, inten. "
 									+ (contadorPing + 1)
-									+ "\nRevisar el estado de la línea telefónica.";
+									+ "\nRevisar el estado de la lï¿½nea telefï¿½nica.";
 					((AlarmaConexionInternet) getApplication()).getSucesos()
 							.add(new Suceso("Internet: " + completMsg,
 									new Date(), ntConect));
@@ -224,14 +236,14 @@ public class MonitorService extends Service {
 
 		if (!sucesoCritico)
 			((AlarmaConexionInternet) getApplication()).getSucesos().add(
-					new Suceso("Monitoreo de conexión Activado", new Date(),
+					new Suceso("Monitoreo de conexiÃ³n Activado", new Date(),
 							true));
 
 		return true;
 
 	}
 
-	public void DetenerMonitor() {
+	public void DetenerMonitor(boolean reanudar) {
 
 		if (monitorTimer != null)
 			monitorTimer.cancel();
@@ -239,11 +251,12 @@ public class MonitorService extends Service {
 			monitorTask.cancel();
 
 		((AlarmaConexionInternet) getApplication()).getSucesos().add(
-				new Suceso("Monitoreo de conexión Apagado", new Date(), false));
+				new Suceso("Monitoreo de conexiÃ³n Apagado", new Date(), false));
 
 		detenerSonidoAlarma();
 		this.sonarAlarma = false;
-		this.monitorActivado = false;
+		
+		this.monitorActivado = reanudar;
 
 		// Log.d("Monitor Internet", "Status: Monitoreo apagado... ");
 	}
@@ -337,9 +350,9 @@ public class MonitorService extends Service {
 					return true;
 				}
 			} catch (MalformedURLException e1) {
-				// Log.d("Error conexión", e1.getStackTrace().toString());
+				// Log.d("Error conexiï¿½n", e1.getStackTrace().toString());
 			} catch (IOException e) {
-				// Log.d("Error conexión IO", e.getStackTrace().toString());
+				// Log.d("Error conexiï¿½n IO", e.getStackTrace().toString());
 			}
 		}
 		return false;
@@ -347,7 +360,7 @@ public class MonitorService extends Service {
 
 	@SuppressWarnings("deprecation")
 	private void showNotification() {
-		CharSequence text = "No se detecta la conexión a Internet\nPings fallidos: "
+		CharSequence text = "No se detecta la conexiÃ³n a Internet\nPings fallidos: "
 				+ contadorPing; // getText(R.string.local_service);
 
 		Notification notification = new Notification(R.drawable.ic_launcher,

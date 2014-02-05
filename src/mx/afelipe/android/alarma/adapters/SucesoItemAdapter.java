@@ -1,24 +1,24 @@
 /**
  * 
- * La aplicación está destinada principalmente a los usuarios de Internet por línea telefónica que 
- * habitan en Xochiltepec, Puebla, Mexico y San Martín Totoltepec, Puebla, Mexico donde el cable telefónico 
+ * La aplicaciï¿½n estï¿½ destinada principalmente a los usuarios de Internet por lï¿½nea telefï¿½nica que 
+ * habitan en Xochiltepec, Puebla, Mexico y San Martï¿½n Totoltepec, Puebla, Mexico donde el cable telefï¿½nico 
  * es robado -principalmente por la madrugada cuando nadie vigila-. 
  * 
- * Al activar el monitoreo la aplicación estará haciendo pruebas de conexión cada cierto tiempo, 
- * al detectar que no puede conectarse a un servidor después de algunos intentos, emitirá un sonido de alarma.
- * Nota: Se requiere que el dispositivo esté siempre conectado a la red WiFi.
+ * Al activar el monitoreo la aplicaciï¿½n estarï¿½ haciendo pruebas de conexiï¿½n cada cierto tiempo, 
+ * al detectar que no puede conectarse a un servidor despuï¿½s de algunos intentos, emitirï¿½ un sonido de alarma.
+ * Nota: Se requiere que el dispositivo estï¿½ siempre conectado a la red WiFi.
  * 
  * 
- * Proyecto empezado por AFelipe Lima Cortés el 28 de agosto de 2013
+ * Proyecto empezado por AFelipe Lima Cortï¿½s el 28 de agosto de 2013
  * 
- * Nota: Si has adquirido este código entonces ayuda a mejorarlo, de lo contrario, espero sirva como parte
- * del aprendizaje sobre programación.
+ * Nota: Si has adquirido este cï¿½digo entonces ayuda a mejorarlo, de lo contrario, espero sirva como parte
+ * del aprendizaje sobre programaciï¿½n.
  * 
- * El código aún necesita ser pulido, mientras pueda cotinuaré mejorandolo
+ * El cï¿½digo aï¿½n necesita ser pulido, mientras pueda cotinuarï¿½ mejorandolo
  * 
  * Mi email: afelipelc@gmail.com
  * 
- * Versión 0.1 Beta.
+ * Versiï¿½n 0.1 Beta.
  */
 
 package mx.afelipe.android.alarma.adapters;

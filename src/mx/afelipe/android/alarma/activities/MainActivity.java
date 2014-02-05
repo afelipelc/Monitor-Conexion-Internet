@@ -1,24 +1,25 @@
 /**
  * 
- * La aplicaciÛn est· destinada principalmente a los usuarios de Internet por lÌnea telefÛnica que 
- * habitan en Xochiltepec, Puebla, Mexico y San MartÌn Totoltepec, Puebla, Mexico donde el cable telefÛnico 
+ * La aplicaci√≥n est√° destinada principalmente a los usuarios de Internet por l√≠nea telef√≥nica que 
+ * habitan en Xochiltepec, Puebla, Mexico y San Mart√≠n Totoltepec, Puebla, Mexico donde el cable telef√≥nico 
  * es robado -principalmente por la madrugada cuando nadie vigila-. 
  * 
- * Al activar el monitoreo la aplicaciÛn estar· haciendo pruebas de conexiÛn cada cierto tiempo, 
- * al detectar que no puede conectarse a un servidor despuÈs de algunos intentos, emitir· un sonido de alarma.
- * Nota: Se requiere que el dispositivo estÈ siempre conectado a la red WiFi.
+ * Al activar el monitoreo la aplicaci√≥n estar√° haciendo pruebas de conexi√≥n cada cierto tiempo, 
+ * al detectar que no puede conectarse a un servidor despu√©s de algunos intentos, emitir√° un sonido de alarma.
+ * Nota: Se requiere que el dispositivo est√© siempre conectado a la red WiFi.
  * 
  * 
- * Proyecto empezado por AFelipe Lima CortÈs el 28 de agosto de 2013
+ * Proyecto empezado por AFelipe Lima Cort√©s el 28 de agosto de 2013
  * 
- * Nota: Si has adquirido este cÛdigo entonces ayuda a mejorarlo, de lo contrario, espero sirva como parte
- * del aprendizaje sobre programaciÛn.
+ * Nota: Si has adquirido este c√≥digo entonces ayuda a mejorarlo, de lo contrario, espero sirva como parte
+ * del aprendizaje sobre programaci√≥n.
  * 
- * El cÛdigo a˙n necesita ser pulido, mientras pueda cotinuarÈ mejorandolo
+ * El c√≥digo a√∫n necesita ser pulido, mientras pueda cotinuar√© mejorandolo
  * 
  * Mi email: afelipelc@gmail.com
+ * @author afelipe
  * 
- * VersiÛn 0.1 Beta.
+ * Versi√≥n 0.1 Beta.
  */
 
 package mx.afelipe.android.alarma.activities;
@@ -56,6 +57,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+/**
+ * Esta clase es la encargada de mostrar la parte gr√°fica para interactuar con el servicio de monitoreo
+ *
+ */
 public class MainActivity extends Activity {
 
 	final long tiempoCheckSucess = (1000 * 60) * 3; // 3 mins
@@ -71,6 +76,7 @@ public class MainActivity extends Activity {
 	SucesoItemAdapter adapterSucesos;
 	List<Suceso> listaSucesos = new ArrayList<Suceso>();
 
+	//Tarea que actualiza la interfaz de usuario con los sucesos generados en el servicio de monitoreo
 	private Handler actualizarUIHandler = new Handler();
 	private Runnable actualizaUITask = new Runnable() {
 		public void run() {
@@ -100,20 +106,21 @@ public class MainActivity extends Activity {
 		prefsMonitor = getSharedPreferences("prefsmonitor",
 				Context.MODE_PRIVATE);
 		
-		EncenderServicio();
+		EncenderServicio(); //Activivar el servicio
 
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
 			notificAlerta = new AlertDialog.Builder(this, R.style.dialog_light);
 		else
 			notificAlerta = new AlertDialog.Builder(this);
 
-		notificAlerta.setTitle("Sin conexiÛn a Internet");
+		//Preparar la alerta informativa que se mostrar√° al usuario
+		notificAlerta.setTitle("Sin conexi√≥n a Internet");
 
 		notificAlerta
-				.setMessage("No se ha podido conectar a www.google.com.mx, revise el estado de la lÌnea telefÛnica."
-						+ "\nSi estamos sin lÌnea, hagamos algo, esta alarma est· sonando en los dispositivos donde se ha instalado y activado.");
+				.setMessage("No se ha podido conectar a www.google.com.mx, revise el estado de la l√≠nea telef√≥nica."
+						+ "\nSi estamos sin l√≠nea, hagamos algo, esta alarma est√° sonando en los dispositivos donde se ha instalado y activado.");
 
-		notificAlerta.setPositiveButton("Ver MÛdem",
+		notificAlerta.setPositiveButton("Ver M√≥dem",
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialogInterface, int i) {
 						// If says OK, stop sound alert and open home modem in browser
@@ -124,7 +131,7 @@ public class MainActivity extends Activity {
 						detenerSonidoBtn.setVisibility(View.GONE);
 
 						Intent intent = new Intent(Intent.ACTION_VIEW);
-						intent.setData(Uri.parse("http://192.168.1.254"));
+						//intent.setData(Uri.parse("http://192.168.1.254"));
 						startActivity(intent);
 
 						mensajeMostrado = false;
@@ -139,6 +146,7 @@ public class MainActivity extends Activity {
 					}
 				});
 
+		//Bot√≥n para activar o desactivar el monitor de internet
 		this.ActDescAlarmBtn
 				.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
@@ -172,7 +180,7 @@ public class MainActivity extends Activity {
 							// .setEstatusAlarma(false);
 							// stop monitoring
 							((AlarmaConexionInternet) getApplication())
-									.getMonitorService().DetenerMonitor();
+									.getMonitorService().DetenerMonitor(false);
 							guardarEstatusPrefs(false);
 
 							actualizarUIHandler
@@ -187,6 +195,7 @@ public class MainActivity extends Activity {
 					}
 				});
 
+		// Bot√≥n para detener el sonido de la alarma si es activada
 		this.detenerSonidoBtn.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View v) {
@@ -219,7 +228,7 @@ public class MainActivity extends Activity {
 		this.ActDescAlarmBtn.setEnabled(true);
 
 		((AlarmaConexionInternet) getApplication()).getSucesos().add(
-				new Suceso("Vista gr·fica iniciada...", new Date(), true));
+				new Suceso("Vista gr√°fica iniciada...", new Date(), true));
 
 		checkStatus();
 		checkSucesos();
@@ -284,8 +293,6 @@ public class MainActivity extends Activity {
 	}
 
 	private void checkSucesos() {
-		// Log.d("Check Sucesos", ((AlarmaConexionInternet)
-		// getApplication()).getSucesos().size()+"");
 		try {
 			if (((AlarmaConexionInternet) getApplication()).getSucesos().size() > 0) {
 
@@ -304,8 +311,6 @@ public class MainActivity extends Activity {
 				adapterSucesos.notifyDataSetChanged();
 				((AlarmaConexionInternet) getApplication()).getSucesos()
 						.clear();
-				// Log.d("Sucesos:",((AlarmaConexionInternet)
-				// getApplication()).getSucesos().size()+"");
 			}
 		} catch (Exception ex) {
 			Log.e("Error", ex.getStackTrace().toString());
