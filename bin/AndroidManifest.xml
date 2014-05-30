@@ -29,16 +29,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <service android:name="mx.afelipe.android.alarma.services.MonitorService" >
-        </service>
-        <receiver android:name="mx.afelipe.android.alarma.services.RestoreService" >
-            <intent-filter>
-                <action android:name="mx.afelipe.android.alarma.restartservice" />
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-
+        <receiver android:name="mx.afelipe.android.alarma.services.MonitorAlarm"></receiver>
         <activity
             android:name="mx.afelipe.android.alarma.activities.AboutActivity"
             android:label="@string/title_activity_about" >

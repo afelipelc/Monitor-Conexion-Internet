@@ -81,11 +81,6 @@ public class MonitorService extends Service {
 		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		if (CargarEstadoInPrefs())
 			IniciarMonitor();
-/*
-		Toast.makeText(getApplicationContext(),
-				"Activando servicio de monitoreo de Internet.",
-				Toast.LENGTH_SHORT).show();
-*/
 	}
 
 	@Override
@@ -95,22 +90,21 @@ public class MonitorService extends Service {
 
 	@Override
 	public void onDestroy() {
-		DetenerMonitor(true); // si Android lo detiene, detener la tarea de
+		
+		DetenerMonitor(isMonitorActivado()); // si Android lo detiene, detener la tarea de
 							// monitoreo para reiniciar después
-		//Toast.makeText(this, "Apagando servicio de monitoreo de Internet",
-		//		Toast.LENGTH_SHORT).show();
+		//Toast.makeText(this, "Apagando servicio de monitoreo de Internet", Toast.LENGTH_SHORT).show();
 
 		// si Android lo destruye, reanudar el servicio
-		if (this.isMonitorActivado()) {
+		if (isMonitorActivado()) {
 			((AlarmaConexionInternet) getApplication()).getSucesos().add(
 					new Suceso("Intentando reiniciar Monitoreo de conexión",
 							new Date(), false));
 			Intent intent = new Intent(
 					"mx.afelipe.android.alarma.restartservice");
 			sendBroadcast(intent);
-		}
-
-		//((AlarmaConexionInternet) getApplication()).setMonitorService(null);
+			//Log.i("Monitor Internet","Intentando llamada para arrancar el servicio");
+		}//else {	((AlarmaConexionInternet) getApplication()).setMonitorService(null); }
 	}
 
 	@Override
@@ -118,14 +112,12 @@ public class MonitorService extends Service {
 		return mBinder;
 	}
 
-	// This is the object that receives interactions from clients. See
-	// RemoteService for a more complete example.
+	// This is the object that receives interactions from clients.
 	private final IBinder mBinder = new LocalBinder();
 
 	private int contadorPing = 0;
 
-	private boolean sucesoCritico = false;
-	private boolean sonarAlarma = false;
+	private boolean sucesoCritico = false, sonarAlarma = false;
 
 	//Al iniciar el servicio, cargar el estado inicial del servicio 
 	private boolean CargarEstadoInPrefs() {
@@ -144,33 +136,26 @@ public class MonitorService extends Service {
 			public void run() {
 				String completMsg = "";
 				boolean ntConect = isWifiConnected(); // esta por WIFI
-
 				completMsg = ntConect ? "OK" : "NO";
 				((AlarmaConexionInternet) getApplication()).getSucesos().add(
 						new Suceso("Wifi Conectado: " + completMsg, new Date(),
 								ntConect));
-
 				if (ntConect)// if is connected via WIFI
 				{
-
 					try {
 						ntConect = isOnline(); // Google are you there?
 					} catch (Exception e) {
 						ntConect = false; // reset connection var
 					}
-
 					completMsg = ntConect ? "Conectado"
 							: "DESCONECTADO, inten. "
 									+ (contadorPing + 1)
-									+ "\nRevisar el estado de la l�nea telef�nica.";
+									+ "\nRevisar el estado de la línea telefónica.";
 					((AlarmaConexionInternet) getApplication()).getSucesos()
 							.add(new Suceso("Internet: " + completMsg,
 									new Date(), ntConect));
-
 					if (!ntConect) {
-
 						contadorPing++;
-
 						if (contadorPing >= 2) {
 							// If isn't Connected, play sound alert
 							if (!sonarAlarma) {
@@ -190,35 +175,15 @@ public class MonitorService extends Service {
 								}
 							}
 						}
-
 						if (!sucesoCritico) {
-							// monitorTimer.schedule(monitorTask, 0,
-							// tiempoCritico); // verificar
-							// en
-							// 2
-							// minutos
-							// monitorTask.cancel();
-							// monitorTimer.cancel();
-
 							sucesoCritico = true;
-							// IniciarMonitor();
-							// Log.d("Monitor Internet",
-							// "Entrando en estado critico");
 						}
-
-						Log.i("Monitor internet", "Pings sin respuesta: "
-								+ contadorPing);
-					} else {
-						if (sucesoCritico && contadorPing > 0) // si se recupero
+						//Log.i("Monitor internet", "Pings sin respuesta: " + contadorPing);
+					} else { // si se recupero
+						if (sucesoCritico && contadorPing > 0)
 						{
-							// monitorTask.cancel();
-							// monitorTimer.cancel();
 							sucesoCritico = false;
 							contadorPing = 0;
-							// IniciarMonitor();
-
-							// Log.d("Monitor Internet",
-							// "Recuperado de estado critico");
 						}
 					}
 				} else {
@@ -231,38 +196,29 @@ public class MonitorService extends Service {
 
 		monitorTimer = new Timer();
 		monitorTimer.schedule(monitorTask, 100, tiempoMonitor);
-
 		this.monitorActivado = true;
 
 		if (!sucesoCritico)
 			((AlarmaConexionInternet) getApplication()).getSucesos().add(
 					new Suceso("Monitoreo de conexión Activado", new Date(),
 							true));
-
 		return true;
-
 	}
 
 	public void DetenerMonitor(boolean reanudar) {
-
 		if (monitorTimer != null)
 			monitorTimer.cancel();
 		if (monitorTask != null)
 			monitorTask.cancel();
-
 		((AlarmaConexionInternet) getApplication()).getSucesos().add(
 				new Suceso("Monitoreo de conexión Apagado", new Date(), false));
-
 		detenerSonidoAlarma();
 		this.sonarAlarma = false;
-		
 		this.monitorActivado = reanudar;
-
-		// Log.d("Monitor Internet", "Status: Monitoreo apagado... ");
+		//Log.i("Monitor Internet", "Status: Monitoreo apagado... status:" + isMonitorActivado() + " set: " + reanudar);
 	}
 
 	private boolean emitirAlarma() {
-
 		showNotification();
 		try {
 			mediaPlayer = MediaPlayer.create(getApplicationContext(),
@@ -300,12 +256,8 @@ public class MonitorService extends Service {
 	}
 
 	public boolean CheckMonitorDesactivado() {
-		// Log.i("Estado Servicio", "Comprobando estado de conexion: "
-		// + monitorActivado);
-
 		if (!monitorActivado) {
-			Log.i("Monitor internet",
-					"Apagado, programando para detener servicio");
+			//Log.i("Monitor internet", "Apagado, programando para detener servicio");
 			detenerSonidoAlarma();
 			stopSelf();
 			return true;
@@ -314,12 +266,11 @@ public class MonitorService extends Service {
 	}
 
 	public boolean isMonitorActivado() {
-		return monitorActivado;
+		return this.monitorActivado;
 	}
 
 	private boolean isWifiConnected() {
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
 		boolean wifiConectado = false;
 		if (cm != null) {
 			NetworkInfo[] netInfo = cm.getAllNetworkInfo();
@@ -331,7 +282,6 @@ public class MonitorService extends Service {
 				}
 			}
 		}
-
 		return wifiConectado;
 	}
 
@@ -350,9 +300,9 @@ public class MonitorService extends Service {
 					return true;
 				}
 			} catch (MalformedURLException e1) {
-				// Log.d("Error conexi�n", e1.getStackTrace().toString());
+				// Log.d("Error conexion", e1.getStackTrace().toString());
 			} catch (IOException e) {
-				// Log.d("Error conexi�n IO", e.getStackTrace().toString());
+				// Log.d("Error conexion IO", e.getStackTrace().toString());
 			}
 		}
 		return false;
@@ -362,15 +312,12 @@ public class MonitorService extends Service {
 	private void showNotification() {
 		CharSequence text = "No se detecta la conexión a Internet\nPings fallidos: "
 				+ contadorPing; // getText(R.string.local_service);
-
 		Notification notification = new Notification(R.drawable.ic_launcher,
 				text, System.currentTimeMillis());
-
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				new Intent(this, MainActivity.class), 0);
 		notification.setLatestEventInfo(this, "Monitor Internet", text,
 				contentIntent);
-
 		// Send the notification.
 		mNM.notify(NOTIFICATION, notification);
 	}

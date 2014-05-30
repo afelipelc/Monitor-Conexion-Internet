@@ -29,14 +29,26 @@ import java.util.List;
 import mx.afelipe.android.alarma.model.Suceso;
 import mx.afelipe.android.alarma.services.MonitorService;
 import android.app.Application;
+import android.media.MediaPlayer;
 
 public class AlarmaConexionInternet extends Application {
-	private MonitorService monitorService;
+	//private MonitorService monitorService;
+	private boolean sonidoAlarma = false;
+	private MediaPlayer player;
 	
-	public boolean isSonandoAlarma() {
-		return monitorService!= null && monitorService.isSonandoAlarma();
+	public void setMediaPlayer(MediaPlayer player){
+		this.player = player;
 	}
-
+	public MediaPlayer soundPlayer(){
+		return player;
+	}
+	public boolean isSonandoAlarma() {
+		//return monitorService!= null && monitorService.isSonandoAlarma();
+		return sonidoAlarma;
+	}
+	public void setSonandoAlarma(boolean status){
+		this.sonidoAlarma = status;
+	}
 
 	private List<Suceso> sucesos = new ArrayList<Suceso>();
 	
@@ -48,25 +60,25 @@ public class AlarmaConexionInternet extends Application {
 		this.sucesos = sucesos;
 	}
 
-	public MonitorService getMonitorService() {
-		return monitorService;
-	}
-
-	public void setMonitorService(MonitorService monitorService) {
-		this.monitorService = monitorService;
-	}
+//	public MonitorService getMonitorService() {
+//		return monitorService;
+//	}
+//
+//	public void setMonitorService(MonitorService monitorService) {
+//		this.monitorService = monitorService;
+//	}
 
 	public AlarmaConexionInternet()
 	{
 		super();
 	}
 
-	public boolean isEstatusAlarma() {
-		return monitorService!= null && monitorService.isMonitorActivado();
-	}
+//	public boolean isEstatusAlarma() {
+//		return monitorService!= null && monitorService.isMonitorActivado();
+//	}
 
-	public String Estatus()
-	{
-		return isEstatusAlarma() ? "Activado" : "Apagado";
-	}
+//	public String Estatus()
+//	{
+//		return isEstatusAlarma() ? "Activado" : "Apagado";
+//	}
 }
